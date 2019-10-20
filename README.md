@@ -1,5 +1,5 @@
 # diystatus
-Do It Yourself Home Automation System server status monitor for Raspberry Pi written in Python3. Computes CPU utilization as a percent, CPU temperature in celsius and free disk space in GB. 
+Do It Yourself server status monitor for Raspberry Pi written in Python3. Computes CPU utilization as a percent, CPU temperature in celsius and free disk space in GB. 
 - Publishes metrics every 10 minutes
 - Uses host name to create MQTT topics
 
