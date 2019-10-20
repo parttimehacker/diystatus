@@ -31,6 +31,7 @@ sudo apt -y install screen
 - Edit the diystatus.service file and enter your user directory 
 - Enter the following commands to install the service
 ```
+sudo cp diystatus.service /lib/systemd/system/diystatus.service
 sudo chmod 644 /lib/systemd/system/diystatus.service
 sudo systemctl daemon-reload
 sudo systemctl enable diystatus.service
