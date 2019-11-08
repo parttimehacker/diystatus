@@ -3,6 +3,9 @@
 
 import time
 import socket
+import logging
+import logging.config
+
 import paho.mqtt.client as mqtt
 import psutil
 from gpiozero import CPUTemperature
@@ -17,7 +20,12 @@ DISK_TOPIC = "diyhas/"+HOST_NAME+"/disk"
 
 # done to overide pylint objections
 
-DEBUG = False
+logging.config.fileConfig(fname='/home/an/diystatus/logging.ini', disable_existing_loggers=False)
+
+# Get the logger specified in the file
+LOGGER = logging.getLogger("diystatus")
+
+LOGGER.info('Application started')
 
 class ServerDataCollector():
     ''' class to encapuslate data collection '''
@@ -39,10 +47,6 @@ class ServerDataCollector():
         # Divide from Bytes -> KB -> MB -> GB
         self.disk_free_accumulator += round(disk.free/1024.0/1024.0/1024.0, 1)
         self.iterations += 1.0
-        if DEBUG:
-            print("CPU=",self.cpu_accumulator/self.iterations, "%")
-            print("TMP=",self.celsius_accumulator/self.iterations, "C")
-            print("DSK=",self.disk_free_accumulator/self.iterations, "GB")
 
     def publish_averages(self,):
         ''' publish cpu temperature and free in to MQTT '''
@@ -114,24 +118,21 @@ TOPIC_DISPATCH_DICTIONARY = {
 # The callback for when the client receives a CONNACK response from the server
 def on_connect(client, userdata, flags, rcdata):
     """ if we lose the connection & reconnect, subscriptions will be renewed """
-    if DEBUG:
-        print(userdata, flags, rcdata)
+    LOGGER.info("on_connect:  "+str(userdata)+" "+str(flags)+" "+str(rcdata))
     client.subscribe("diyhas/system/fire", 1)
     client.subscribe("diyhas/system/panic", 1)
     client.subscribe("diyhas/system/who", 1)
 
 def on_disconnect(client, userdata, rcdata):
     ''' optional disconnect method '''
-    if DEBUG:
-        print(userdata, rcdata)
+    LOGGER.info("on_disconnect:  "+str(userdata)+" "+str(rcdata))
     client.connected_flag = False
     client.disconnect_flag = True
 
 # The callback for when a PUBLISH message is received from the server
 def on_message(client, userdata, msg):
     """ dispatch to the appropriate MQTT topic handler """
-    if DEBUG:
-        print(client, userdata, msg)
+    LOGGER.info("on_message:  "+str(userdata)+" "+str(msg.topic)+" "+str(msg.payload))
     TOPIC_DISPATCH_DICTIONARY[msg.topic]["method"](msg)
 
 if __name__ == '__main__':
