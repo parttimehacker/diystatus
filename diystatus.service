@@ -1,0 +1,8 @@
+[Unit]
+Description=Diyhas Status 
+After=multi-user.target
+[Service]
+Type=idle
+ExecStart=/usr/bin/python3 /home/an/diystatus/diystatus.py 
+[Install]
+WantedBy=multi-user.target
