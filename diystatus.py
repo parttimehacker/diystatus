@@ -118,21 +118,18 @@ TOPIC_DISPATCH_DICTIONARY = {
 # The callback for when the client receives a CONNACK response from the server
 def on_connect(client, userdata, flags, rcdata):
     """ if we lose the connection & reconnect, subscriptions will be renewed """
-    LOGGER.info("on_connect:  "+str(userdata)+" "+str(flags)+" "+str(rcdata))
     client.subscribe("diyhas/system/fire", 1)
     client.subscribe("diyhas/system/panic", 1)
     client.subscribe("diyhas/system/who", 1)
 
 def on_disconnect(client, userdata, rcdata):
     ''' optional disconnect method '''
-    LOGGER.info("on_disconnect:  "+str(userdata)+" "+str(rcdata))
     client.connected_flag = False
     client.disconnect_flag = True
 
 # The callback for when a PUBLISH message is received from the server
 def on_message(client, userdata, msg):
     """ dispatch to the appropriate MQTT topic handler """
-    LOGGER.info("on_message:  "+str(userdata)+" "+str(msg.topic)+" "+str(msg.payload))
     TOPIC_DISPATCH_DICTIONARY[msg.topic]["method"](msg)
 
 if __name__ == '__main__':
