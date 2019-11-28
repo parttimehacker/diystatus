@@ -12,11 +12,11 @@ from gpiozero import CPUTemperature
 
 # Set up MQTT constants
 
-MQTT_ADDRESS = "192.168.1.17"
+MQTT_ADDRESS = "192.168.1.53"
 HOST_NAME = socket.gethostname()
-CPU_TOPIC = "diyhas/"+HOST_NAME+"/cpu"
-CELSIUS_TOPIC = "diyhas/"+HOST_NAME+"/cpucelsius"
-DISK_TOPIC = "diyhas/"+HOST_NAME+"/disk"
+CPU_TOPIC = "diy/"+HOST_NAME+"/cpu"
+CELSIUS_TOPIC = "diy/"+HOST_NAME+"/cpucelsius"
+DISK_TOPIC = "diy/"+HOST_NAME+"/disk"
 
 # done to overide pylint objections
 
@@ -95,32 +95,32 @@ def check_for_timed_events(data_collector):
 
 def system_message(msg):
     """ process system messages"""
-    if msg.topic == 'diyhas/system/fire':
+    if msg.topic == 'diy/system/fire':
         if msg.payload == b'ON':
             print("fire message")
-    elif msg.topic == 'diyhas/system/panic':
+    elif msg.topic == 'diy/system/panic':
         if msg.payload == b'ON':
             print("panic message")
-    elif msg.topic == 'diyhas/system/who':
+    elif msg.topic == 'diy/system/who':
         if msg.payload == b'ON':
             print("who message")
 
 # use a dispatch model for the subscriptions
 TOPIC_DISPATCH_DICTIONARY = {
-    "diyhas/system/fire":
+    "diy/system/fire":
         {"method":system_message},
-    "diyhas/system/panic":
+    "diy/system/panic":
         {"method":system_message},
-    "diyhas/system/who":
+    "diy/system/who":
         {"method":system_message}
     }
 
 # The callback for when the client receives a CONNACK response from the server
 def on_connect(client, userdata, flags, rcdata):
     """ if we lose the connection & reconnect, subscriptions will be renewed """
-    client.subscribe("diyhas/system/fire", 1)
-    client.subscribe("diyhas/system/panic", 1)
-    client.subscribe("diyhas/system/who", 1)
+    client.subscribe("diy/system/fire", 1)
+    client.subscribe("diy/system/panic", 1)
+    client.subscribe("diy/system/who", 1)
 
 def on_disconnect(client, userdata, rcdata):
     ''' optional disconnect method '''
