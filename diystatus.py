@@ -5,6 +5,7 @@ import time
 import socket
 import logging
 import logging.config
+import subprocess
 
 import paho.mqtt.client as mqtt
 import psutil
@@ -17,6 +18,8 @@ HOST_NAME = socket.gethostname()
 CPU_TOPIC = "diy/"+HOST_NAME+"/cpu"
 CELSIUS_TOPIC = "diy/"+HOST_NAME+"/cpucelsius"
 DISK_TOPIC = "diy/"+HOST_NAME+"/disk"
+OS_VERSION_TOPIC = "diy/"+HOST_NAME+"/os"
+PI_VERSION_TOPIC = "diy/"+HOST_NAME+"/pi"
 
 # done to overide pylint objections
 
@@ -64,6 +67,27 @@ class ServerDataCollector():
             self.celsius_accumulator = 0.0
             self.disk_free_accumulator = 0.0
             self.iterations = 0.0
+            
+def publish_os_version(client):
+    ''' get the current os version and make available to diyservers '''
+    cmd = subprocess.Popen('cat /etc/os-release', shell=True, stdout=subprocess.PIPE)
+    for line in cmd.stdout:
+        if b'=' in line:
+            key, value = line.split(b'=')
+            if b'VERSION' == key:
+                data, chaff = value.split(b'\n')
+                strData = str(data, 'utf-8')
+                osVersion = strData.replace('"','')
+                client.publish(OS_VERSION_TOPIC, osVersion, 0, True)
+                
+def publish_pi_version(client):
+    ''' get the current pi version and make available to diyservers '''
+    cmd = subprocess.Popen('cat /proc/device-tree/model', shell=True, stdout=subprocess.PIPE)
+    for line in cmd.stdout:
+        key, value = line.split(b' Pi ')
+        data, chaff = value.split(b'\x00')
+        piVersion = str(data, 'utf-8') + "Raspberry Pi "
+        client.publish(PI_VERSION_TOPIC, piVersion, 0, True)
 
 def check_system_status(data_collector):
     ''' display systems status '''
@@ -140,6 +164,9 @@ if __name__ == '__main__':
     CLIENT.on_message = on_message
     CLIENT.connect(MQTT_ADDRESS, 1883, 60)
     CLIENT.loop_start()
+    
+    publish_os_version(CLIENT)
+    publish_pi_version(CLIENT)
 
     DATA_COLLECTOR = ServerDataCollector(CLIENT)
 
