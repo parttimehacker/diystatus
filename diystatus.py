@@ -157,6 +157,9 @@ def on_message(client, userdata, msg):
     TOPIC_DISPATCH_DICTIONARY[msg.topic]["method"](msg)
 
 if __name__ == '__main__':
+    
+    # give network time to startup - hack?
+    time.sleep(120.0)
 
     CLIENT = mqtt.Client()
     CLIENT.on_connect = on_connect
@@ -169,9 +172,6 @@ if __name__ == '__main__':
     publish_pi_version(CLIENT)
 
     DATA_COLLECTOR = ServerDataCollector(CLIENT)
-
-    # give network time to startup - hack?
-    time.sleep(1.0)
 
     # loop forever checking for interrupts or timed events
 
